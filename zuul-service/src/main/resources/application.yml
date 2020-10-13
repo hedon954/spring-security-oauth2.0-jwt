@@ -1,0 +1,43 @@
+server:
+  port: 9527
+spring:
+  application:
+    name: zuul-service
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/imooc-security?useSSL=false&useUnicode=true&characterEncoding=UTF8&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+  jpa:
+    generate-ddl: true
+    show-sql: true
+
+# 网关配置
+zuul:
+  # 配置网关路由
+  routes:
+    token:  #路由到认证服务器
+      url: http://localhost:9070
+    order:  #路由到订单服务
+      url: http://localhost:9090
+  sensitive-headers:  #敏感头默认是 cookie、set-cookie 和 authentication 这 3 个，设为敏感头的话 Zuul 将不会传递它们到下一个过滤器，这里我们需要传递，所以设为空
+  # 配置 zuul 流控
+  ratelimit:
+    enabled: true             # 支持流控
+    repository: JPA           # 存到 JPA，生产上是存到 Redis
+    default-policy-list:      # 默认的流控策略  （2.4.x 版本的 zuul-limit 好像没有这个，最好使用 2.2.x 低版本的 zuul-limit
+      - limit: 2
+        quota: 1              # quota=1 & limit=2 表示在 1 秒中之内可以接受 2 次请求
+        refresh-interval: 1   # 刷新间隔
+        type:                 # 限流的类型
+          - url               # 根据 url 来限流，如 /a，/b
+          - httpmethod        # 根据 httpmethod 来限流，如 get，post
+#         - user             # 根据用户来限流，需要引入 spring security，一般不用
+#         - origin           # 根据用户的 ip 地址来限流
+#   policy-list:      #对每一个路由到的微服务量身定制一个流控策略，而不采用默认的全局流控策略
+#     token:
+#       - limit: 10
+#         quota: 1
+#         refresh-interval: 1
+#         type:
+

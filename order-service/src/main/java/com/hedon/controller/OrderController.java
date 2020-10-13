@@ -1,11 +1,8 @@
 package com.hedon.controller;
 
-import com.hedon.bean.User;
 import com.hedon.dto.OrderDto;
 import com.hedon.dto.PriceDto;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -20,8 +17,8 @@ public class OrderController {
     private RestTemplate restTemplate = new RestTemplate();
 
     @PostMapping("/create")
-    public OrderDto create(@RequestBody OrderDto orderDto, @AuthenticationPrincipal User user){
-        System.out.println("user is " + user);
+    public OrderDto create(@RequestBody OrderDto orderDto, @RequestHeader String username){
+        System.out.println("user is " + username);
         ResponseEntity<PriceDto> entity = restTemplate.getForEntity("http://localhost:9080/price/" + orderDto.getId(), PriceDto.class);
         PriceDto priceDto = entity.getBody();
         System.out.println(priceDto);
