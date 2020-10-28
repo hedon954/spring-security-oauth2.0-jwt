@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+
+</head>
+<body>
+    <div id="withoutLogin">
+        <center>
+            <h1>Please Login In：</h1>
+        </center>
+        <form id="login-form">
+            <center>
+                username: <input type="text" id="username_input" name="username">
+            </center>
+            <center>
+                password: <input type="text" id="password_input" name="password">
+            </center>
+            <center>
+                <input type="button" value="Login" onclick="login()" />
+            </center>
+        </form>
+    </div>
+
+    <!-- 如果登录成功了，会显示相应的信息 -->
+    <div id="loginInfo">
+        <h2 id="loginMsg"></h2>
+    </div>
+
+    <!--  退出登录按钮  -->
+    <center>
+        <input type="button" value="Logout" onclick="logout()" />
+    </center>
+
+    <!--  获取订单信息  -->
+    <center>
+        <input type="button" value="GetOrderInfo" onclick="getOrderInfo()" />
+        <p>order id = <span id="order-id-span"></span></p>
+    </center>
+</body>
+
+<!--引入 jQuery-->
+<script th:src="@{/static/js/jquery-3.1.1.min.js}"></script>
+<script type="text/javascript">
+
+    $(function () {
+        //页面加载完成后，先判断是否有登录
+        checkLoginOrNot();
+    });
+
+    //登陆
+    function login() {
+        var username = $("#username_input").val();
+        var password = $("#password_input").val();
+        $.ajax({
+            async:false,
+            url:"/login?username="+username+"&password="+password,
+            type:"POST",
+            success:function (result) {
+                if (result.code=="00000"){
+                    $("#loginMsg").text("Hello "+username + "!! You've been authenticated!!");
+                } else{
+                    $("#loginMsg").text("Sorry~~~");
+                }
+            }
+        });
+        return false;
+    };
+
+    //退出登录
+    function logout() {
+        $.ajax({
+            async:false,
+            url:"/logout",
+            type:"POST",
+            success:function (result) {
+                if (result.code=="00000"){
+                    $("#loginMsg").text("Logout Success");
+                } else{
+                    $("#loginMsg").text("Sorry~~~ Logout Failed.");
+                }
+            }
+        });
+        return false;
+    };
+
+    //检查是否已经登录
+    function checkLoginOrNot() {
+        $.ajax({
+            async:false,
+            url:"/checkLogin",
+            type:"POST",
+            success:function (result) {
+                if (result.code=="00000"){
+                    $("#loginMsg").text("Hello "+result.message + "!! You've been authenticated!!");
+                } else{
+                    $("#loginMsg").text("Please Login in!");
+                }
+            }
+        })
+    }
+    
+    //如果已经登录，那么是可以查询订单信息的
+    function getOrderInfo() {
+        $.ajax({
+            async:false,
+            url:"/api/order/order/1",  //这里我们就查id为1的订单信息
+            type:"GET",
+            success:function (result) {
+                if (result.id == "1"){
+                    $("#order-id-span").text(result.id)
+                }else{
+                    $("#order-id-span").text("请先登录")
+                }
+            },
+            error:function () {
+                $("#order-id-span").text("请先登录")
+            }
+        })
+    }
+
+</script>
+</html>

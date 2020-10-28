@@ -1,0 +1,18 @@
+server:
+  port: 9060
+spring:
+  application:
+    name: front-end
+  # 配置静态资源文件路径，保证 jQuery 可以成功引入
+  mvc:
+    static-path-pattern: /static/**/**
+  # 关掉 thymeleaf 的缓存
+  thymeleaf:
+    cache: false
+
+zuul:
+  routes:
+    api:
+      #转发到后台网关
+      url: http://localhost:9527
+  sensitive-headers:

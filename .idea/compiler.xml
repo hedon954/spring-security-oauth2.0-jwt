@@ -7,14 +7,20 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="zuul-service" />
         <module name="price-service" />
         <module name="auth-service" />
         <module name="order-service" />
-        <module name="zuul-service" />
+        <module name="front-end" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="gateway-service" target="1.8" />
     </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="front-end" options="-parameters" />
+    </option>
   </component>
 </project>
