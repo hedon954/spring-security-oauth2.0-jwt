@@ -1,28 +1,24 @@
 package com.hedon.controller;
 
 import com.hedon.constants.ResultCode;
-import com.hedon.pojo.LoginUser;
 import com.hedon.pojo.TokenInfo;
 import com.hedon.result.CommonResult;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-
-import javax.annotation.Resources;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * @author Hedon Wang
  * @create 2020-10-28 10:28
  */
 @RestController
+@Slf4j
 public class UserController {
 
     private RestTemplate restTemplate = new RestTemplate();
@@ -73,4 +69,41 @@ public class UserController {
         }
     }
 
+
+    /**
+     * 回调接口
+     *
+     * @param code         认证服务器返回的授权码，必须
+     * @param state        我们自定义的返回的客户端状态信息，可选
+     * @param request
+     */
+    @GetMapping("/oauth/callback")
+    public void callBack(@RequestParam("code") String code, String state, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        //日志输出 state 状态信息
+        log.info("state is "+ state);
+        //去认证服务器拿token，还是走网关
+        String oauthServiceUrl = "http://localhost:9527/token/oauth/token";
+        //请求头
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.setBasicAuth("frontEnd","123456");
+        /**
+         * 参数:
+         * 1. 授权码
+         * 2. 授权模式：授权码模式authorization_code
+         * 3. 重定向 uri：要跟前端的一样
+         */
+        MultiValueMap<String,String> params = new LinkedMultiValueMap<>();
+        params.add("code",code);
+        params.add("grant_type","authorization_code");
+        params.add("redirect_uri","http://localhost:9060/oauth/callback");
+        //封装请求体
+        HttpEntity<MultiValueMap<String,String>> entity = new HttpEntity<>(params,headers);
+        //发送请求
+        ResponseEntity<TokenInfo> token = restTemplate.exchange(oauthServiceUrl, HttpMethod.POST, entity, TokenInfo.class);
+        //存到 session 中
+        request.getSession().setAttribute("token",token.getBody());
+        //跳转回浏览器
+        response.sendRedirect("/index");
+    }
 }

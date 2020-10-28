@@ -7,22 +7,22 @@
 
 </head>
 <body>
-    <div id="withoutLogin">
-        <center>
-            <h1>Please Login In：</h1>
-        </center>
-        <form id="login-form">
-            <center>
-                username: <input type="text" id="username_input" name="username">
-            </center>
-            <center>
-                password: <input type="text" id="password_input" name="password">
-            </center>
-            <center>
-                <input type="button" value="Login" onclick="login()" />
-            </center>
-        </form>
-    </div>
+<!--    <div>-->
+<!--        <center>-->
+<!--            <h1>Please Login In：</h1>-->
+<!--        </center>-->
+<!--        <form id="login-form">-->
+<!--            <center>-->
+<!--                username: <input type="text" id="username_input" name="username">-->
+<!--            </center>-->
+<!--            <center>-->
+<!--                password: <input type="text" id="password_input" name="password">-->
+<!--            </center>-->
+<!--            <center>-->
+<!--                <input type="button" value="Login" onclick="login()" />-->
+<!--            </center>-->
+<!--        </form>-->
+<!--    </div>-->
 
     <!-- 如果登录成功了，会显示相应的信息 -->
     <div id="loginInfo">
@@ -97,6 +97,12 @@
                     $("#loginMsg").text("Hello "+result.message + "!! You've been authenticated!!");
                 } else{
                     $("#loginMsg").text("Please Login in!");
+                    //跳转到认证服务器上
+                    window.location.href = "http://localhost:9070/oauth/authorize?"+
+                            "client_id=frontEnd"+"&"+
+                            "redirect_uri=http://localhost:9060/oauth/callback"+"&"+
+                            "response_type=code"+"&"+
+                            "state=abc";
                 }
             }
         })
