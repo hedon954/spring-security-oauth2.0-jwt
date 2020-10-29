@@ -83,7 +83,7 @@ public class SessionTokenFilter extends ZuulFilter {
                      */
                     //不能再继续往下传了，得重新认证了
                     requestContext.setSendZuulResponse(false);
-                    //返回错误码500
+                    //返回错误码10086
                     requestContext.setResponseStatusCode(10086);
                     //返回错误信息
                     requestContext.setResponseBody("\"message\": \"refresh failed\"");
