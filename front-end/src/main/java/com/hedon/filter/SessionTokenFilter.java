@@ -4,6 +4,7 @@ import com.hedon.pojo.TokenInfo;
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
 import com.netflix.zuul.exception.ZuulException;
+import lombok.SneakyThrows;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -42,6 +43,7 @@ public class SessionTokenFilter extends ZuulFilter {
      * @return
      * @throws ZuulException
      */
+    @SneakyThrows
     @Override
     public Object run() throws ZuulException {
 
@@ -68,12 +70,29 @@ public class SessionTokenFilter extends ZuulFilter {
                 params.add("refresh_token",token.getRefresh_token());  //刷新令牌
                 //请求头
                 HttpEntity<MultiValueMap<String,String>> entity = new HttpEntity<>(params,httpHeaders);
-                //发送请求
-                ResponseEntity<TokenInfo> response = restTemplate.exchange(refreshTokenUrl, HttpMethod.POST, entity, TokenInfo.class);
-                //拿到新的 token，同时初始化它，设置过期时间
-                token = response.getBody().init();
-                //放到 session 中
-                request.getSession().setAttribute("token",token);
+                try{
+                    //发送请求
+                    ResponseEntity<TokenInfo> response = restTemplate.exchange(refreshTokenUrl, HttpMethod.POST, entity, TokenInfo.class);
+                    //拿到新的 token，同时初始化它，设置过期时间
+                    token = response.getBody().init();
+                    //放到 session 中
+                    request.getSession().setAttribute("token",token);
+                }catch (Exception e){
+                    /**
+                     * 前面已经检测到 access_token 过期了，然后刷新令牌又异常了，那肯定就是令牌失效了
+                     */
+                    //不能再继续往下传了，得重新认证了
+                    requestContext.setSendZuulResponse(false);
+                    //返回错误码500
+                    requestContext.setResponseStatusCode(10086);
+                    //返回错误信息
+                    requestContext.setResponseBody("\"message\": \"refresh failed\"");
+                    //设置响应类型为json
+                    requestContext.getResponse().setContentType("application/json");
+                    //清除 session
+                    request.getSession().invalidate();
+                }
+
             }
             //将 token 放在请求头中传下去
             requestContext.addZuulRequestHeader("Authorization","bearer "+token.getAccess_token());

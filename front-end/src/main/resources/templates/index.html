@@ -129,5 +129,21 @@
         })
     }
 
+    /**
+     * 由 AJAX 实现的全局拦截器
+     */
+    $.ajaxSetup({
+        dataType: "json",
+        cache: false,
+        complete: function (error) {
+            console.log("检查刷新结果")
+            if (error.status === 10086) {
+                console.log("刷新失败")
+                //重定向到后台的logout接口，清除后台的 session，强制要求用户重新登录
+                window.location.href="http://localhost:9070/logout";
+            }
+        }
+    })
+
 </script>
 </html>
