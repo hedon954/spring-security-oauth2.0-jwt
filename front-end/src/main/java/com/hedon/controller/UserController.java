@@ -40,9 +40,10 @@ public class UserController {
             params.add("scope","write read");
             HttpEntity<MultiValueMap<String,String>> entity = new HttpEntity<>(params,httpHeaders);
             ResponseEntity<TokenInfo> response = restTemplate.exchange(oauthServiceUrl, HttpMethod.POST, entity, TokenInfo.class);
-            //放到请求域中
-            request.getSession().setAttribute("token",response.getBody());
-            return CommonResult.success().add("tokenInfo",response.getBody());
+            //放到请求域中，放进去之前需要初始化，设置过期时间
+            request.getSession().setAttribute("token",response.getBody().init());
+            System.out.println(response.getBody().init());
+            return CommonResult.success().add("tokenInfo",response.getBody().init());
         }catch (Exception e){
             return CommonResult.fail(ResultCode.USER_PWD_WRONG);
         }
@@ -102,7 +103,7 @@ public class UserController {
         //发送请求
         ResponseEntity<TokenInfo> token = restTemplate.exchange(oauthServiceUrl, HttpMethod.POST, entity, TokenInfo.class);
         //存到 session 中
-        request.getSession().setAttribute("token",token.getBody());
+        request.getSession().setAttribute("token",token.getBody().init());
         //跳转回浏览器
         response.sendRedirect("/index");
     }

@@ -78,6 +78,8 @@
             success:function (result) {
                 if (result.code=="00000"){
                     $("#loginMsg").text("Logout Success");
+                    //成功后重定向到后台的logout接口
+                    window.location.href="http://localhost:9070/logout";
                 } else{
                     $("#loginMsg").text("Sorry~~~ Logout Failed.");
                 }
