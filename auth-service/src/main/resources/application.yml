@@ -1,5 +1,8 @@
 server:
   port: 9070
+  servlet:
+    session:
+      timeout: 259200
 
 spring:
   application:
@@ -9,3 +12,4 @@ spring:
     url: jdbc:mysql://localhost:3306/imooc-security?useSSL=false&useUnicode=true&characterEncoding=UTF8&serverTimezone=Asia/Shanghai
     username: root
     password: root
+

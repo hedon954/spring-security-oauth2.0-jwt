@@ -7,11 +7,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="front-end" />
+        <module name="zuul-service" />
         <module name="price-service" />
         <module name="auth-service" />
         <module name="order-service" />
-        <module name="zuul-service" />
+        <module name="front-end" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
