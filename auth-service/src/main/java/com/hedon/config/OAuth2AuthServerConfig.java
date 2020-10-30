@@ -15,11 +15,15 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.session.jdbc.config.annotation.web.http.EnableJdbcHttpSession;
 
 import javax.sql.DataSource;
 
 /**
+ * 认证服务器配置类
+ *
  * @author Hedon Wang
  * @create 2020-10-12 09:15
  */
@@ -45,7 +49,15 @@ public class OAuth2AuthServerConfig extends AuthorizationServerConfigurerAdapter
     //token 存储器
     @Bean
     public TokenStore tokenStore(){
-        return new JdbcTokenStore(dataSource);
+//        return new JdbcTokenStore(dataSource);
+        return new JwtTokenStore(jwtTokenEnhancer());
+    }
+
+    //JWT token 增强器
+    private JwtAccessTokenConverter jwtTokenEnhancer() {
+        JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
+        converter.setSigningKey("hedon");  //设置签名
+        return converter;
     }
 
     //配置客户端应用的相关信息
@@ -60,14 +72,18 @@ public class OAuth2AuthServerConfig extends AuthorizationServerConfigurerAdapter
         //这部分由 authenticationManager 来管理
         endpoints
                 .userDetailsService(userDetailsService)
-                .tokenStore(tokenStore())  //配置令牌存储模式
+                .tokenStore(tokenStore())          //配置令牌存储模式
+                .tokenEnhancer(jwtTokenEnhancer()) //配置 jwt 令牌增强器
                 .authenticationManager(authenticationManager);
     }
 
     //配置谁能来验 token （有一些请求连验 token 的资格都没有）
     @Override
     public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
-        //必须带身份信息来验证token才进行验证
-        security.checkTokenAccess("isAuthenticated()");
+        security
+                //暴露获取 signingkey 的服务
+                .tokenKeyAccess("isAuthenticated()")
+                //必须带身份信息来验证token才进行验证
+                .checkTokenAccess("isAuthenticated()");
     }
 }
