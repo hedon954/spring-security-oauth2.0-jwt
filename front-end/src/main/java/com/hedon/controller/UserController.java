@@ -4,11 +4,14 @@ import com.hedon.constants.ResultCode;
 import com.hedon.pojo.TokenInfo;
 import com.hedon.result.CommonResult;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -58,10 +61,20 @@ public class UserController {
     @PostMapping("/checkLogin")
     public CommonResult checkLogin(HttpServletRequest request){
         try {
+            //先尝试看能不能从 session 中拿到 token
             TokenInfo tokenInfo = (TokenInfo)request.getSession().getAttribute("token");
             if (tokenInfo != null){
                 return CommonResult.success().add("tokenInfo",tokenInfo);
             }else{
+                //如果 session 中没有，那就再试试看能不能从 cookie 中找到
+                Cookie[] cookies = request.getCookies();
+                for (Cookie cookie: cookies){
+                    if (StringUtils.equals("cookie_access_token",cookie.getName())){
+                        //找到了就说明已经登录了
+                        return CommonResult.success();
+                    }
+                }
+                //都没找到的话，就说没登录
                 return CommonResult.fail(ResultCode.NO_LOGIN);
             }
         }catch (Exception e){
@@ -102,8 +115,41 @@ public class UserController {
         HttpEntity<MultiValueMap<String,String>> entity = new HttpEntity<>(params,headers);
         //发送请求
         ResponseEntity<TokenInfo> token = restTemplate.exchange(oauthServiceUrl, HttpMethod.POST, entity, TokenInfo.class);
+        /*
         //存到 session 中
         request.getSession().setAttribute("token",token.getBody().init());
+         */
+
+        /**
+         * 存到 access_token 到 cookie 中
+         */
+
+        //放 access_token
+        Cookie accessTokenCookie = new Cookie("cookie_access_token",token.getBody().getAccess_token());
+        //cookie 有效期
+        accessTokenCookie.setMaxAge(token.getBody().getExpires_in().intValue() - 3);
+        //一级域名
+        accessTokenCookie.setDomain("localhost");
+        //根目录
+        accessTokenCookie.setPath("/");
+        //将 cookie 放到响应体中
+        response.addCookie(accessTokenCookie);
+
+        /**
+         * 存到 refresh_token 到 cookie 中
+         */
+
+        //放 refresh_token
+        Cookie refreshTokenCookie = new Cookie("cookie_refresh_token",token.getBody().getRefresh_token());
+        //cookie 有效期
+        refreshTokenCookie.setMaxAge(259200);
+        //一级域名
+        refreshTokenCookie.setDomain("localhost");
+        //根目录
+        refreshTokenCookie.setPath("/");
+        //将 token 放到响应体中
+        response.addCookie(refreshTokenCookie);
+
         //跳转回浏览器
         response.sendRedirect("/index");
     }

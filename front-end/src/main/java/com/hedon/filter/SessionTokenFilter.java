@@ -14,6 +14,8 @@ import org.springframework.web.client.RestTemplate;
 import javax.servlet.http.HttpServletRequest;
 
 /**
+ * 基于 Session 的 SSO
+ *
  * @author Hedon Wang
  * @create 2020-10-28 11:29
  */
