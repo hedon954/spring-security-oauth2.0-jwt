@@ -54,7 +54,8 @@ public class OAuth2AuthServerConfig extends AuthorizationServerConfigurerAdapter
     }
 
     //JWT token 增强器
-    private JwtAccessTokenConverter jwtTokenEnhancer() {
+    @Bean
+    public JwtAccessTokenConverter jwtTokenEnhancer() {
         JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
         converter.setSigningKey("hedon");  //设置签名
         return converter;

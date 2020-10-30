@@ -1,2 +1,14 @@
 server:
   port: 9090
+
+#配置去认证服务器拿 SigningKey
+security:
+  oauth2:
+    #配置客户端信息
+    client:
+      client-id: orderService
+      client-secret: 123456
+    #配置拿 key 的请求路径
+    resource:
+      jwt:
+        key-uri: http://localhost:9070/oauth/token_key
