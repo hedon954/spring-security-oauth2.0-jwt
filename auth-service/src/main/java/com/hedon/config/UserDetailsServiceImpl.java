@@ -24,6 +24,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         return User.withUsername(username)
                 .password(passwordEncoder.encode("123456"))
                 .authorities("ROLE_USER","ROLE_ORDER","ROLE_PRICE")
+//                .authorities("ROLE_USER","ROLE_PRICE")
+//                .authorities("ROLE_USER","ROLE_ORDER")
                 .build();
     }
 }
