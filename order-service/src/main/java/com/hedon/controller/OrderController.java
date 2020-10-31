@@ -4,6 +4,8 @@ import com.hedon.dto.OrderDto;
 import com.hedon.dto.PriceDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
  */
 @RestController
 @RequestMapping("/order")
+@EnableGlobalMethodSecurity(prePostEnabled = true)   //支持全局方法安全控制
 public class OrderController {
 
     /**
@@ -24,6 +27,8 @@ public class OrderController {
     private OAuth2RestTemplate oauth2RestTemplate;
 
     @PostMapping("/create")
+//    @PreAuthorize("#oauth2.hasScope('write')")        //scope 控制权限
+    @PreAuthorize("hasRole('ROLE_ORDER')")
     public OrderDto create(@RequestBody OrderDto orderDto, @AuthenticationPrincipal String username){
         System.out.println("user is " + username);
         ResponseEntity<PriceDto> entity = oauth2RestTemplate.getForEntity("http://localhost:9080/price/" + orderDto.getId(), PriceDto.class);

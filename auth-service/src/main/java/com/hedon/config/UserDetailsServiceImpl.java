@@ -23,7 +23,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         //这里表示 username 任意，密码只要是 123456 就可以了。
         return User.withUsername(username)
                 .password(passwordEncoder.encode("123456"))
-                .authorities("ROLE_ADMIN")  //我们这里设置一个全新叫"ROLE_ADMIN"
+                .authorities("ROLE_USER","ROLE_ORDER","ROLE_PRICE")
                 .build();
     }
 }
